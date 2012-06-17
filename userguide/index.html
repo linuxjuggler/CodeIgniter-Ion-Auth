@@ -67,12 +67,13 @@
 				<li><a href="#users">users()</a></li>
 				<li><a href="#group">group()</a></li>
 				<li><a href="#groups">groups()</a></li>
+				<li><a href="#get_users_groups">get_users_groups()</a></li>
 				<li><a href="#messages">messages()</a></li>
 				<li><a href="#set_message_delimiters">set_message_delimiters()</a></li>
 				<li><a href="#errors">errors()</a></li>
 				<li><a href="#set_error_delimiters">set_error_delimiters()</a></li>
         <li><a href="#trigger_events">trigger_events()</a></li>
-        <li><a href="#set_hook">set_hook</a></li>
+        <li><a href="#set_hook">set_hook()</a></li>
 			</ul>
     	</td>
 	</tr>
@@ -686,7 +687,6 @@ Documentation
 			<pre>
 			stdClass Object (
 				[id] => 1
-				[group_id] => 1
 				[ip_address] => 127.0.0.1
 				[username] => administrator
 				[password] => 59beecdf7fc966e2f17fd8f65a4a9aeb09d4a3d4
@@ -698,8 +698,6 @@ Documentation
 				[created_on] => 1268889823
 				[last_login] => 1279464628
 				[active] => 0
-				[group] => admin
-				[group_description] => Administrator
 				[first_name] => Admin
 				[last_name] => Account
 				[company] => Some Corporation
@@ -720,6 +718,11 @@ Documentation
 	<h2>users()</h2>
 	<p>Get the users.</p>
 
+	<p><strong>Parameters</strong></p>
+	<ol>
+		<li>'Group IDs' - array OPTIONAL. If an array of group ids are passed (or a single group id) this will return the users in those groups.</li>
+	</ol>
+
 	<p><strong>Return</strong></p>
 	<ul>
 		<li>array of objects</li>
@@ -727,7 +730,7 @@ Documentation
 
 	<p><b>Usage</b></p>
 	<pre>
-		$admin_users = $this->ion_auth->users();
+		$users = $this->ion_auth->users();
 	</pre>
 	<br />
 
@@ -793,6 +796,34 @@ Documentation
 			$errors = $this->ion_auth->errors();
 			echo $errors;
 		}
+	</pre>
+	<br />
+
+<a name="get_users_groups"></a>
+	<h2>get_users_groups()</h2>
+	<p>Get all groups a user is part of.</p>
+
+	<p><strong>Parameters</strong></p>
+	<ol>
+		<li>'Id' - integer OPTIONAL. If a user id is not passed the id of the currently logged in user will be used.</li>
+	</ol>
+
+	<p><strong>Return</strong></p>
+	<ul>
+		<li>
+			<pre>
+			stdClass Object (
+				[id] => 1
+				[name] => admins
+				[description] => Administrator
+			)
+			</pre>
+		</li>
+	</ul>
+
+	<p><b>Usage</b></p>
+	<pre>
+		$user_groups = $this->ion_auth->get_users_groups($user->id)->result();
 	</pre>
 	<br />
 
@@ -891,7 +922,10 @@ Documentation
 
 	<a name="set_hook"></a>
   <h2>set_hook()</h2>
-  <p>Set a single or multiple functions to be called when trigged by trigger_events()</p>
+  <p>
+  	Set a single or multiple functions to be called when trigged by trigger_events().  
+  	See an example here: <a href="http://gist.github.com/657de89b26decda2b2fa" target="_blank">http://gist.github.com/657de89b26decda2b2fa</a>  
+  </p>
   
   <p><strong>Parameters</strong></p>
   <ol>
