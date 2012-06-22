@@ -162,7 +162,7 @@ class Ion_auth_mongodb_model extends CI_Model {
 	public function __construct()
 	{
 		parent::__construct();
-		$this->load->database();
+		$this->load->library('mongo_db');
 		$this->load->config('ion_auth', TRUE);
 		$this->load->helper('cookie');
 		$this->load->helper('date');
@@ -1512,7 +1512,15 @@ class Ion_auth_mongodb_model extends CI_Model {
 		// Hash new password
 		if (array_key_exists('password', $data))
 		{
-			$data['password'] = $this->hash_password($data['password'], $user->salt);
+			if( ! empty($data['password']))
+			{
+				$data['password'] = $this->hash_password($data['password'], $user->salt);
+			}
+			else
+			{
+				// unset password so it doesn't effect database entry if password field empty
+				unset($data['password']);
+			}
 		}
 
 		// TODO: DO WE NEED TO CHECK EMAIL AND USERNAME VALUES REGARDLESS
