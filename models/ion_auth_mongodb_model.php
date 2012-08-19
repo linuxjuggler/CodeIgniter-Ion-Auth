@@ -1620,12 +1620,23 @@ class Ion_auth_mongodb_model extends CI_Model {
 	{
 		$this->trigger_events('set_lang');
 
+		// if the user_expire is set to zero we'll set the expiration two years from now.
+		if($this->config->item('user_expire', 'ion_auth') === 0)
+		{
+			$expire = (60*60*24*365*2);
+		}
+		// otherwise use what is set
+		else
+		{
+			$expire = $this->config->item('user_expire', 'ion_auth');
+		}
+
 		set_cookie(array(
 			'name'   => 'lang_code',
 			'value'  => $lang,
-			'expire' => $this->config->item('user_expire', 'ion_auth') + time(),
+			'expire' => $expire
 		));
-
+		
 		return TRUE;
 	}
 
@@ -1636,7 +1647,7 @@ class Ion_auth_mongodb_model extends CI_Model {
 	 *
 	 * @return bool
 	 */
-	private function remember_user($id)
+	public function remember_user($id)
 	{
 		$this->trigger_events('pre_remember_user');
 
@@ -1658,16 +1669,27 @@ class Ion_auth_mongodb_model extends CI_Model {
 		// Set cookies
 		if ($updated)
 		{
+			// if the user_expire is set to zero we'll set the expiration two years from now.
+			if($this->config->item('user_expire', 'ion_auth') === 0)
+			{
+				$expire = (60*60*24*365*2);
+			}
+			// otherwise use what is set
+			else
+			{
+				$expire = $this->config->item('user_expire', 'ion_auth');
+			}
+			
 			set_cookie(array(
-				'name'   => 'identity',
-				'value'  => $user->{$this->identity_column},
-				'expire' => $this->config->item('user_expire', 'ion_auth'),
+			    'name'   => 'identity',
+			    'value'  => $user->{$this->identity_column},
+			    'expire' => $expire
 			));
 
 			set_cookie(array(
-				'name'   => 'remember_code',
-				'value'  => $salt,
-				'expire' => $this->config->item('user_expire', 'ion_auth'),
+			    'name'   => 'remember_code',
+			    'value'  => $salt,
+			    'expire' => $expire
 			));
 
 			$this->trigger_events(array('post_remember_user', 'remember_user_successful'));
@@ -1948,15 +1970,7 @@ class Ion_auth_mongodb_model extends CI_Model {
 	 */
 	protected function _prepare_ip($ip_address)
 	{
-		if ($this->db->platform() === 'postgre')
-		{
-			return $ip_address;
-		}
-		else
-		{
-			// Return the packed in_addr representation of the passed IP to be stored
-			return inet_pton($ip_address);
-		}
+		return $ip_address;
 	}
 
 	// ------------------------------------------------------------------------

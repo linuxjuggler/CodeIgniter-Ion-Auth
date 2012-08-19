@@ -71,6 +71,13 @@ class Ion_auth_model extends CI_Model
 	public $_ion_select = array();
 
 	/**
+	 * Like
+	 *
+	 * @var string
+	 **/
+	public $_ion_like = array();
+	
+	/**
 	 * Limit
 	 *
 	 * @var string
@@ -916,7 +923,7 @@ class Ion_auth_model extends CI_Model
 	function get_attempts_num($identity)
 	{
 		if ($this->config->item('track_login_attempts', 'ion_auth')) {
-			$ip_address = $this->_prepare_ip($this->input->ip_address());;
+			$ip_address = $this->_prepare_ip($this->input->ip_address());
 			
 			$this->db->select('1', FALSE);
 			$this->db->where('ip_address', $ip_address);
@@ -991,6 +998,20 @@ class Ion_auth_model extends CI_Model
 		return $this;
 	}
 
+	public function like($like, $value = NULL)
+	{
+		$this->trigger_events('like');
+
+		if (!is_array($like))
+		{
+			$like = array($like => $value);
+		}
+
+		array_push($this->_ion_like, $like);
+
+		return $this;
+	}
+	
 	public function select($select)
 	{
 		$this->trigger_events('select');
@@ -1111,6 +1132,16 @@ class Ion_auth_model extends CI_Model
 			}
 
 			$this->_ion_where = array();
+		}
+
+		if (isset($this->_ion_like))
+		{
+			foreach ($this->_ion_like as $like)
+			{
+				$this->db->or_like($like);
+			}
+
+			$this->_ion_like = array();
 		}
 
 		if (isset($this->_ion_limit) && isset($this->_ion_offset))
@@ -1427,10 +1458,21 @@ class Ion_auth_model extends CI_Model
 	{
 		$this->trigger_events('set_lang');
 
+		// if the user_expire is set to zero we'll set the expiration two years from now.
+		if($this->config->item('user_expire', 'ion_auth') === 0)
+		{
+			$expire = (60*60*24*365*2);
+		}
+		// otherwise use what is set
+		else
+		{
+			$expire = $this->config->item('user_expire', 'ion_auth');
+		}
+
 		set_cookie(array(
 			'name'   => 'lang_code',
 			'value'  => $lang,
-			'expire' => $this->config->item('user_expire', 'ion_auth') + time()
+			'expire' => $expire
 		));
 
 		return TRUE;
@@ -1459,16 +1501,27 @@ class Ion_auth_model extends CI_Model
 
 		if ($this->db->affected_rows() > -1)
 		{
+			// if the user_expire is set to zero we'll set the expiration two years from now.
+			if($this->config->item('user_expire', 'ion_auth') === 0)
+			{
+				$expire = (60*60*24*365*2);
+			}
+			// otherwise use what is set
+			else
+			{
+				$expire = $this->config->item('user_expire', 'ion_auth');
+			}
+			
 			set_cookie(array(
 			    'name'   => 'identity',
 			    'value'  => $user->{$this->identity_column},
-			    'expire' => $this->config->item('user_expire', 'ion_auth'),
+			    'expire' => $expire
 			));
 
 			set_cookie(array(
 			    'name'   => 'remember_code',
 			    'value'  => $salt,
-			    'expire' => $this->config->item('user_expire', 'ion_auth'),
+			    'expire' => $expire
 			));
 
 			$this->trigger_events(array('post_remember_user', 'remember_user_successful'));

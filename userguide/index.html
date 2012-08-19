@@ -202,7 +202,7 @@ Documentation
 		<li>'max_password_length' - Maximum length of passwords.  DEFAULT is '20'.</li>
 		<li>'email_activation' - TRUE or FALSE. Sets whether to require email activation or not. DEFAULT is 'false'.</li>
 		<li>'remember_users' - TRUE or FALSE. Sets whether to enable 'remember me' functionality or not. DEFAULT is 'true'.</li>
-		<li>'user_expire' - Sets how long to remember the user for in seconds. DEFAULT is '86500'.</li>
+		<li>'user_expire' - Sets how long to remember the user for in seconds. Set to zero for no expiration. DEFAULT is '86500'.</li>
 		<li>'user_extend_on_login' -  TRUE or FALSE.  Extend the users session expiration on login. DEFAULT is 'false'.</li>
 		<li>'email_type' - Email content type. DEFAULT us 'html'.</li>
 		<li>'email_templates' -  Folder where the email view templates are stored. DEFAULT is 'auth/email/'.</li>
@@ -444,6 +444,12 @@ Documentation
 	<h2>is_admin()</h2>
 	<p>Check to see if the currently logged in user is an admin.</p>
 
+
+	<p><strong>Parameters</strong></p>
+	<ol>
+		<li>'id' - integer OPTIONAL.  If a user id is not passed the id of the currently logged in user will be used.</li>
+	</ol>
+
 	<p><strong>Return</strong></p>
 	<ul>
 		<li>boolean.  TRUE if the user is an admin FALSE if the user is not an admin.</li>
@@ -465,7 +471,8 @@ Documentation
 
 	<p><strong>Parameters</strong></p>
 	<ol>
-		<li>'Group Name' - string or array of strings REQUIRED.</li>
+		<li>'Group ID or Name' - string, integer or array of strings and integers REQUIRED.</li>
+		<li>'User ID' - integer OPTIONAL.  If a user id is not passed the id of the currently logged in user will be used.</li>
 	</ol>
 
 	<p><strong>Return</strong></p>
@@ -475,7 +482,7 @@ Documentation
 
 	<p><b>Usage</b></p>
 	<pre>
-		# single group
+		# single group (by name)
 		$group = 'gangstas';
 		if (!$this->ion_auth->in_group($group))
 		{
@@ -483,10 +490,32 @@ Documentation
 			redirect('welcome/index');
 		}
 
-		# multiple groups
+		# single group (by id)
+		$group = 1;
+		if (!$this->ion_auth->in_group($group))
+		{
+			$this->session->set_flashdata('message', 'You must be part of the group 1 to view this page');
+			redirect('welcome/index');
+		}
+
+		# multiple groups (by name)
 		$group = array('gangstas', 'hoodrats');
 		if (!$this->ion_auth->in_group($group))
 			$this->session->set_flashdata('message', 'You must be a gangsta OR a hoodrat to view this page');
+			redirect('welcome/index');
+		}
+
+		# multiple groups (by id)
+		$group = array(1, 2);
+		if (!$this->ion_auth->in_group($group))
+			$this->session->set_flashdata('message', 'You must be a part of group 1 or 2 to view this page');
+			redirect('welcome/index');
+		}
+
+		# multiple groups (by id and name)
+		$group = array('gangstas', 2);
+		if (!$this->ion_auth->in_group($group))
+			$this->session->set_flashdata('message', 'You must be a part of the gangstas or group 2');
 			redirect('welcome/index');
 		}
 	</pre>
@@ -767,7 +796,7 @@ Documentation
 
 	<p><b>Usage</b></p>
 	<pre>
-		$groups = $this->ion_auth->groups();
+		$groups = $this->ion_auth->groups()->result();
 	</pre>
 	<br />
 

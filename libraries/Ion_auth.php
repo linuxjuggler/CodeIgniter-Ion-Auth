@@ -142,7 +142,7 @@ class Ion_auth
 					$this->email->clear();
 					$this->email->from($this->config->item('admin_email', 'ion_auth'), $this->config->item('site_title', 'ion_auth'));
 					$this->email->to($user->email);
-					$this->email->subject($this->config->item('site_title', 'ion_auth') . ' - Forgotten Password Verification');
+					$this->email->subject($this->config->item('site_title', 'ion_auth') . ' - ' . $this->lang->line('email_forgotten_password_subject'));
 					$this->email->message($message);
 
 					if ($this->email->send())
@@ -211,7 +211,7 @@ class Ion_auth
 				$this->email->clear();
 				$this->email->from($this->config->item('admin_email', 'ion_auth'), $this->config->item('site_title', 'ion_auth'));
 				$this->email->to($profile->email);
-				$this->email->subject($this->config->item('site_title', 'ion_auth') . ' - New Password');
+				$this->email->subject($this->config->item('site_title', 'ion_auth') . ' - ' . $this->lang->line('email_new_password_subject'));
 				$this->email->message($message);
 
 				if ($this->email->send())
@@ -335,7 +335,7 @@ class Ion_auth
 				$this->email->clear();
 				$this->email->from($this->config->item('admin_email', 'ion_auth'), $this->config->item('site_title', 'ion_auth'));
 				$this->email->to($email);
-				$this->email->subject($this->config->item('site_title', 'ion_auth') . ' - Account Activation');
+				$this->email->subject($this->config->item('site_title', 'ion_auth') . ' - ' . $this->lang->line('email_activation_subject'));
 				$this->email->message($message);
 
 				if ($this->email->send() == TRUE)
@@ -406,13 +406,13 @@ class Ion_auth
 	 * @return bool
 	 * @author Ben Edmunds
 	 **/
-	public function is_admin()
+	public function is_admin($id=false)
 	{
 		$this->ion_auth_model->trigger_events('is_admin');
 
 		$admin_group = $this->config->item('admin_group', 'ion_auth');
 
-		return $this->in_group($admin_group);
+		return $this->in_group($admin_group, $id);
 	}
 
 	/**
@@ -426,16 +426,22 @@ class Ion_auth
 		$this->ion_auth_model->trigger_events('in_group');
 
 		$users_groups = $this->ion_auth_model->get_users_groups($id)->result();
-		$groups = array();
+
+		$groups_by_name = array();
+		$groups_by_id = array();
+
 		foreach ($users_groups as $group)
 		{
-			$groups[] = $group->name;
+			$groups_by_name[] = $group->name;
+			$groups_by_id[] = $group->id;
 		}
 
 		if (is_array($check_group))
 		{
 			foreach($check_group as $key => $value)
 			{
+				$groups = (is_string($value)) ? $groups_by_name : $groups_by_id;
+
 				if (in_array($value, $groups))
 				{
 					return TRUE;
@@ -444,6 +450,8 @@ class Ion_auth
 		}
 		else
 		{
+			$groups = (is_string($check_group)) ? $groups_by_name : $groups_by_id;
+
 			if (in_array($check_group, $groups))
 			{
 				return TRUE;

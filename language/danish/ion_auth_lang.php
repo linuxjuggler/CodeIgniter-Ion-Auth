@@ -22,4 +22,9 @@ $lang['update_successful'] = 'Kontoen er opdateret';
 $lang['update_unsuccessful'] = 'Det var ikke muligt at opdatere kontoen';
 $lang['delete_successful'] = 'Bruger slettet';
 $lang['delete_unsuccessful'] = 'Det var ikke muligt at slette bruger';
+
+// Email Subjects - TODO Please Translate
+$lang['email_forgotten_password_subject']    = 'Verifikation af glemt adgangskode';
+$lang['email_new_password_subject']          = 'Nyt kodeord';
+$lang['email_activation_subject']            = 'Konto aktivering';
 ?>
